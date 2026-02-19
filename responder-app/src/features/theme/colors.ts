@@ -1,0 +1,113 @@
+import type { ThemeColors } from './types';
+
+export const darkColors: ThemeColors = {
+  background: {
+    primary: '#0a0a12',
+    secondary: '#12121f',
+    tertiary: '#1a1a2e',
+    elevated: '#22223a',
+  },
+  text: {
+    primary: '#ffffff',
+    secondary: '#b4b4c4',
+    tertiary: '#6b6b7b',
+    inverse: '#0a0a12',
+  },
+  brand: {
+    primary: '#6366f1',
+    secondary: '#8b5cf6',
+    accent: '#06b6d4',
+  },
+  status: {
+    success: '#22c55e',
+    successLight: '#4ade80',
+    warning: '#f59e0b',
+    warningLight: '#fbbf24',
+    error: '#ef4444',
+    errorLight: '#f87171',
+    info: '#3b82f6',
+    infoLight: '#60a5fa',
+  },
+  priority: {
+    critical: '#dc2626',
+    criticalBg: 'rgba(220, 38, 38, 0.15)',
+    high: '#ea580c',
+    highBg: 'rgba(234, 88, 12, 0.15)',
+    medium: '#d97706',
+    mediumBg: 'rgba(217, 119, 6, 0.15)',
+    low: '#16a34a',
+    lowBg: 'rgba(22, 163, 74, 0.15)',
+  },
+  ui: {
+    border: '#2a2a3e',
+    borderLight: '#3a3a4e',
+    divider: '#1f1f2f',
+    overlay: 'rgba(0, 0, 0, 0.75)',
+    card: '#16162a',
+    cardHover: '#1e1e36',
+  },
+  gradients: {
+    primary: ['#6366f1', '#8b5cf6'] as const,
+    success: ['#22c55e', '#16a34a'] as const,
+    warning: ['#f59e0b', '#d97706'] as const,
+    error: ['#ef4444', '#dc2626'] as const,
+    dark: ['#1a1a2e', '#0a0a12'] as const,
+    glass: ['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)'] as const,
+  },
+};
+
+export const lightColors: ThemeColors = {
+  background: {
+    primary: '#f8fafc',
+    secondary: '#ffffff',
+    tertiary: '#f1f5f9',
+    elevated: '#ffffff',
+  },
+  text: {
+    primary: '#0f172a',
+    secondary: '#475569',
+    tertiary: '#94a3b8',
+    inverse: '#ffffff',
+  },
+  brand: {
+    primary: '#6366f1',
+    secondary: '#8b5cf6',
+    accent: '#06b6d4',
+  },
+  status: {
+    success: '#16a34a',
+    successLight: '#22c55e',
+    warning: '#d97706',
+    warningLight: '#f59e0b',
+    error: '#dc2626',
+    errorLight: '#ef4444',
+    info: '#2563eb',
+    infoLight: '#3b82f6',
+  },
+  priority: {
+    critical: '#dc2626',
+    criticalBg: 'rgba(220, 38, 38, 0.1)',
+    high: '#ea580c',
+    highBg: 'rgba(234, 88, 12, 0.1)',
+    medium: '#d97706',
+    mediumBg: 'rgba(217, 119, 6, 0.1)',
+    low: '#16a34a',
+    lowBg: 'rgba(22, 163, 74, 0.1)',
+  },
+  ui: {
+    border: '#e2e8f0',
+    borderLight: '#cbd5e1',
+    divider: '#f1f5f9',
+    overlay: 'rgba(0, 0, 0, 0.5)',
+    card: '#ffffff',
+    cardHover: '#f8fafc',
+  },
+  gradients: {
+    primary: ['#6366f1', '#8b5cf6'] as const,
+    success: ['#22c55e', '#16a34a'] as const,
+    warning: ['#f59e0b', '#d97706'] as const,
+    error: ['#ef4444', '#dc2626'] as const,
+    dark: ['#f1f5f9', '#e2e8f0'] as const,
+    glass: ['rgba(255,255,255,0.9)', 'rgba(255,255,255,0.7)'] as const,
+  },
+};
