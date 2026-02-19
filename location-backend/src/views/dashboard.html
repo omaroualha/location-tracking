@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Location Tracking Monitor</title>
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.10/dist/ext/sse.js"></script>
+  <style>
+    :root {
+      --bg: #0a0a0f;
+      --surface: #12121a;
+      --surface-hover: #1a1a25;
+      --border: #2a2a3a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --primary: #3b82f6;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --error: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 1.5rem;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .connection-status {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    .connection-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--error);
+    }
+
+    .connection-dot.connected {
+      background: var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-top: 0.25rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      overflow: hidden;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-hover);
+    }
+
+    .section-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .section-content {
+      padding: 1rem;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .session-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .session-card.active {
+      border-color: var(--success);
+    }
+
+    .session-card.inactive {
+      opacity: 0.7;
+    }
+
+    .session-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .device-id {
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+
+    .status-badge {
+      font-size: 0.65rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 1rem;
+      background: var(--border);
+      color: var(--text-muted);
+    }
+
+    .status-badge.active {
+      background: var(--success);
+      color: white;
+    }
+
+    .session-stats {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .gaps-warning {
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      background: rgba(245, 158, 11, 0.1);
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      color: var(--warning);
+    }
+
+    .location-row {
+      display: flex;
+      gap: 1rem;
+      padding: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+      font-family: monospace;
+    }
+
+    .location-row:last-child {
+      border-bottom: none;
+    }
+
+    .location-row .time {
+      color: var(--text-muted);
+      min-width: 80px;
+    }
+
+    .location-row .device {
+      color: var(--primary);
+      min-width: 70px;
+    }
+
+    .location-row .coords {
+      flex: 1;
+    }
+
+    .location-row .accuracy {
+      color: var(--text-muted);
+      min-width: 50px;
+      text-align: right;
+    }
+
+    .empty {
+      color: var(--text-muted);
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.9rem;
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn {
+      padding: 0.4rem 0.75rem;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: all 0.15s;
+    }
+
+    .btn:hover {
+      background: var(--surface-hover);
+    }
+
+    .btn-danger {
+      border-color: var(--error);
+      color: var(--error);
+    }
+
+    .btn-danger:hover {
+      background: var(--error);
+      color: white;
+    }
+
+    .live-feed {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      max-width: 350px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      z-index: 100;
+    }
+
+    .live-feed-header {
+      padding: 0.75rem;
+      background: var(--surface-hover);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .live-feed-content {
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 0.75rem;
+    }
+
+    .feed-item {
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      animation: fadeIn 0.3s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .feed-item .count {
+      color: var(--success);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Location Tracking Monitor</h1>
+    <div class="connection-status">
+      <div class="connection-dot" id="connectionDot"></div>
+      <span id="connectionText">Connecting...</span>
+    </div>
+  </div>
+
+  <div class="stats-grid" hx-get="/partials/stats" hx-trigger="load, every 5s" hx-swap="innerHTML">
+    <div class="stat-card">
+      <div class="stat-value">-</div>
+      <div class="stat-label">Loading...</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">Sessions</span>
+        <div class="actions">
+          <button class="btn" hx-get="/partials/sessions" hx-target="#sessions-content" hx-swap="innerHTML">Refresh</button>
+        </div>
+      </div>
+      <div class="section-content" id="sessions-content" hx-get="/partials/sessions" hx-trigger="load, every 10s" hx-swap="innerHTML">
+        <p class="empty">Loading...</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <span class="section-title">Recent Locations</span>
+        <div class="actions">
+          <a class="btn" href="/api/export" download>Export</a>
+          <button class="btn btn-danger" hx-delete="/api/data" hx-confirm="Clear all data?" hx-swap="none" onclick="setTimeout(() => location.reload(), 500)">Clear</button>
+        </div>
+      </div>
+      <div class="section-content" id="recent-content" hx-get="/partials/recent" hx-trigger="load, every 5s" hx-swap="innerHTML">
+        <p class="empty">Loading...</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="live-feed" id="liveFeed" style="display: none;">
+    <div class="live-feed-header">
+      <span>Live Feed</span>
+      <button class="btn" onclick="document.getElementById('liveFeed').style.display='none'">×</button>
+    </div>
+    <div class="live-feed-content" id="feedContent"></div>
+  </div>
+
+  <script>
+    const eventSource = new EventSource('/events');
+    const connectionDot = document.getElementById('connectionDot');
+    const connectionText = document.getElementById('connectionText');
+    const liveFeed = document.getElementById('liveFeed');
+    const feedContent = document.getElementById('feedContent');
+
+    eventSource.addEventListener('connected', () => {
+      connectionDot.classList.add('connected');
+      connectionText.textContent = 'Connected';
+    });
+
+    eventSource.addEventListener('locations', (e) => {
+      const data = JSON.parse(e.data);
+
+      // Show live feed
+      liveFeed.style.display = 'block';
+
+      // Add to feed
+      const item = document.createElement('div');
+      item.className = 'feed-item';
+      item.innerHTML = `
+        <span class="count">+${data.count}</span> from ${data.deviceId.slice(0, 8)}...
+        <br><small style="color: var(--text-muted)">${new Date().toLocaleTimeString()}</small>
+      `;
+      feedContent.insertBefore(item, feedContent.firstChild);
+
+      // Keep only last 10 items
+      while (feedContent.children.length > 10) {
+        feedContent.removeChild(feedContent.lastChild);
+      }
+
+      // Refresh partials
+      htmx.trigger('#sessions-content', 'htmx:load');
+      htmx.trigger('#recent-content', 'htmx:load');
+    });
+
+    eventSource.onerror = () => {
+      connectionDot.classList.remove('connected');
+      connectionText.textContent = 'Disconnected';
+    };
+  </script>
+</body>
+</html>
