@@ -1,4 +1,4 @@
-# SEON Responder App
+#  Responder App
 
 A mission-critical React Native/Expo mobile application for emergency responder coordination, paired with a Node.js location backend.
 
@@ -7,7 +7,7 @@ A mission-critical React Native/Expo mobile application for emergency responder 
 ## Project Structure
 
 ```
-SEON/
+/
 ├── responder-app/        # React Native mobile app (Expo SDK 54)
 ├── location-backend/     # Node.js Express API + web dashboard
 ├── DOCUMENTATION.md      # Deep technical documentation
