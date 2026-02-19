@@ -12,7 +12,6 @@ A mission-critical React Native/Expo mobile application for emergency responder 
 ├── location-backend/     # Node.js Express API + web dashboard
 ├── DOCUMENTATION.md      # Deep technical documentation
 ├── design-memo.md        # Architecture decisions
-└── task.txt              # Original assignment brief
 ```
 
 ---
